@@ -1,0 +1,137 @@
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #0f0f1a;
+}
+
+.auth-card {
+  background: #1a1a2e;
+  padding: 40px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.auth-card h2 {
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.auth-subtitle {
+  color: #888;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.auth-card label {
+  display: block;
+  color: #ccc;
+  font-size: 13px;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0f0f1a;
+  color: #fff;
+  outline: none;
+}
+
+.auth-card input:focus {
+  border-color: #7c5cff;
+}
+
+.auth-card button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c5cff, #5b8cff);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  margin-top: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #7c5cff;
+  text-decoration: none;
+}
+
+.auth-error {
+  background: rgba(255, 70, 70, 0.15);
+  color: #ff6b6b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.auth-success {
+  background: rgba(70, 255, 130, 0.12);
+  color: #4ade80;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  margin-top: 0 !important;
+  box-shadow: none !important;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 44px;
+  box-sizing: border-box;
+}
