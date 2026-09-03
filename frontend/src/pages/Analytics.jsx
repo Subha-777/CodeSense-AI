@@ -19,9 +19,9 @@ function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/analytics", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
         setData(res.data);
       } catch (err) {
         setError("Failed to load analytics");

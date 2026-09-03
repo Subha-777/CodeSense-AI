@@ -23,10 +23,10 @@ function DocsGenerator({ code, language, onClose }) {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/generate-docs",
-        { code, language },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/generate-docs`,
+  { code, language },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setDocumentation(res.data.documentation);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to generate documentation");

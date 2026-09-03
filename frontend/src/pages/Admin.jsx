@@ -34,11 +34,11 @@ function Admin() {
     setLoading(true);
     try {
       const [statsRes, usersRes, analyticsRes, systemRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/admin/stats", { headers }),
-        axios.get("http://localhost:5000/api/admin/users", { headers }),
-        axios.get("http://localhost:5000/api/admin/analytics", { headers }),
-        axios.get("http://localhost:5000/api/admin/system", { headers }),
-      ]);
+  axios.get(`${import.meta.env.VITE_API_URL}/api/admin/stats`, { headers }),
+  axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, { headers }),
+  axios.get(`${import.meta.env.VITE_API_URL}/api/admin/analytics`, { headers }),
+  axios.get(`${import.meta.env.VITE_API_URL}/api/admin/system`, { headers }),
+]);
       setStats(statsRes.data);
       setUsers(usersRes.data.users);
       setAnalytics(analyticsRes.data);
@@ -55,7 +55,7 @@ function Admin() {
       async () => {
         closePopup();
         try {
-          await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, { headers });
+          await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, { headers });
           setUsers(users.filter((u) => u.id !== userId));
           showPopup("User deleted successfully!", "success");
         } catch (err) {

@@ -33,10 +33,10 @@ function Home() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/review",
-        { code, language, reviewMode },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/review`,
+  { code, language, reviewMode },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setReview(response.data.review);
     } catch (error) {
       if (error.response?.status === 503) {
@@ -57,10 +57,10 @@ function Home() {
     }
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/convert",
-        { code, fromLanguage: language, toLanguage: targetLanguage },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/convert`,
+  { code, fromLanguage: language, toLanguage: targetLanguage },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setConvertResult({
         code: response.data.convertedCode,
         language: targetLanguage,
@@ -80,10 +80,10 @@ function Home() {
     setRunResult(null);
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/run-code",
-        { code, language, stdin },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/run-code`,
+  { code, language, stdin },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setRunResult(res.data);
     } catch (err) {
       setRunError(err.response?.data?.error || "Failed to run code");

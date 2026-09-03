@@ -24,13 +24,13 @@ function Profile() {
     const fetchData = async () => {
       try {
         const [meRes, analyticsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:5000/api/analytics", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+  axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+  axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+]);
         setProfile(meRes.data.user);
         setStats(analyticsRes.data);
       } catch (err) {
@@ -61,10 +61,10 @@ function Profile() {
       setPhotoLoading(true);
       try {
         const res = await axios.put(
-          "http://localhost:5000/api/auth/update-photo",
-          { profilePhoto: base64 },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+  `${import.meta.env.VITE_API_URL}/api/auth/update-photo`,
+  { profilePhoto: base64 },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
         setProfile((prev) => ({ ...prev, profilePhoto: res.data.profilePhoto }));
         setPhotoMessage("Profile photo updated successfully!");
       } catch (err) {
@@ -88,10 +88,10 @@ function Profile() {
     setPwLoading(true);
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/auth/change-password",
-        { currentPassword, newPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/auth/change-password`,
+  { currentPassword, newPassword },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setPwMessage(res.data.message);
       setCurrentPassword("");
       setNewPassword("");

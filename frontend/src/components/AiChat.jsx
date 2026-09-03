@@ -33,15 +33,15 @@ function AiChat({ code, language, review }) {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/chat",
-        {
-          messages: updatedMessages,
-          code,
-          language,
-          review,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/chat`,
+  {
+    messages: updatedMessages,
+    code,
+    language,
+    review,
+  },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
 
       setMessages([
         ...updatedMessages,

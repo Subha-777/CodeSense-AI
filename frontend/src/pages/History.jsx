@@ -20,9 +20,9 @@ function History() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/reviews", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reviews`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
         setReviews(res.data.reviews);
         setFiltered(res.data.reviews);
       } catch (err) {
@@ -63,9 +63,9 @@ function History() {
       async () => {
         closePopup();
         try {
-          await axios.delete(`http://localhost:5000/api/reviews/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await axios.delete(`${import.meta.env.VITE_API_URL}/api/reviews/${id}`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
           const updated = reviews.filter((r) => r._id !== id);
           setReviews(updated);
           setFiltered(updated);

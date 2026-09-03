@@ -22,10 +22,10 @@ function GitHubFetch({ onCodeFetched }) {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/github/fetch",
-        { url: url.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/api/github/fetch`,
+  { url: url.trim() },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
 
       onCodeFetched(res.data.code, res.data.language);
       setSuccess(`✅ Code fetched successfully! Language detected: ${res.data.language}`);
