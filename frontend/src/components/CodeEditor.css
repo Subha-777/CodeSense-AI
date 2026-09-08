@@ -1,12 +1,19 @@
+/* ================================
+   CODE EDITOR — RESPONSIVE DESIGN
+================================ */
+
 .editor-container {
   display: flex;
   flex-direction: column;
   width: 50%;
   height: 100%;
+  min-width: 0;
   border-right: 2px solid #0f3460;
   background: #0d1117;
+  color: #e6edf3;
 }
 
+/* Header */
 .editor-header {
   display: flex;
   justify-content: space-between;
@@ -14,6 +21,7 @@
   padding: 15px 20px;
   background: #161b22;
   border-bottom: 1px solid #0f3460;
+  gap: 12px;
 }
 
 .editor-title {
@@ -23,26 +31,34 @@
   margin: 0;
 }
 
-.upload-btn {
-  padding: 8px 15px;
+.editor-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  background: #1e1e2a;
+  border: 1px solid #2a2a35;
+  color: #ccc;
+  padding: 8px 12px;
   border-radius: 8px;
-  background: #21262d;
-  color: #58a6ff;
-  font-size: 13px;
   cursor: pointer;
-  border: 1px solid #30363d;
-  transition: all 0.3s ease;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.upload-btn:hover {
-  background: #58a6ff;
-  color: #fff;
+.icon-btn:hover {
+  background: #262633;
+  border-color: #58a6ff;
 }
 
+/* Code editor */
 .editor-wrapper {
   flex: 1;
+  min-height: 0;
   overflow: hidden;
-  height: 100%;
 }
 
 .editor-wrapper .cm-editor {
@@ -53,79 +69,86 @@
   outline: none;
 }
 
-.line-count {
-  font-size: 13px;
-  color: #888;
+/* CodeMirror internal sizing */
+.editor-wrapper .cm-scroller {
+  overflow: auto;
 }
 
-.review-btn {
-  padding: 10px 25px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
+.editor-wrapper .cm-content {
+  padding: 12px 0;
+}
+
+/* ================================
+   PROGRAM INPUT
+================================ */
+
+.stdin-toggle-row {
+  padding: 6px 12px;
+  background: #0d1117;
+  border-top: 1px solid #0f3460;
+}
+
+.stdin-toggle {
+  background: none;
   border: none;
+  color: #8b8bf5;
+  font-size: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  padding: 4px 8px;
 }
 
-.review-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+.stdin-toggle:hover {
+  text-decoration: underline;
 }
 
-.review-btn.loading {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+.stdin-section {
+  padding: 10px 12px;
+  border-top: 1px solid #30363d;
+  background: #161b22;
 }
 
-/* Light mode */
-.light .editor-container {
-  background: #f6f8fa;
-  border-right: 2px solid #c3cfe2;
+.stdin-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #1e1e2e;
+  color: #eee;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
 }
 
-.light .editor-header {
-  background: #fff;
-  border-bottom: 1px solid #c3cfe2;
+.stdin-textarea:focus {
+  border-color: #8b5cf6;
 }
 
-.light .editor-title {
-  color: #333;
-}
-
-.light .code-textarea {
-  background: #f6f8fa;
-  color: #333;
-}
-
-.light .editor-footer {
-  background: #fff;
-  border-top: 1px solid #c3cfe2;
-}
+/* ================================
+   MODE SELECTOR
+================================ */
 
 .mode-selector {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding: 8px 20px;
+  padding: 10px 20px;
   border-bottom: 1px solid #0f3460;
   background: #0d1117;
 }
 
 .mode-label {
-  color: #888;
+  color: #8b949e;
   font-size: 12px;
   margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .mode-btn {
-  padding: 5px 10px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
   border: 1px solid #30363d;
   background: #21262d;
   color: #8b949e;
@@ -133,6 +156,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .mode-btn:hover {
@@ -147,6 +171,10 @@
   font-weight: 600;
 }
 
+/* ================================
+   FOOTER
+================================ */
+
 .editor-footer {
   display: flex;
   flex-direction: column;
@@ -158,23 +186,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 12px 20px;
+}
+
+.line-count {
+  font-size: 13px;
+  color: #888;
+  white-space: nowrap;
 }
 
 .footer-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .convert-wrapper {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .convert-select {
-  padding: 8px 10px;
+  padding: 9px 12px;
   border-radius: 8px;
   border: 1px solid #30363d;
   background: #21262d;
@@ -182,14 +219,20 @@
   font-size: 13px;
   outline: none;
   cursor: pointer;
+  min-width: 0;
 }
 
 .convert-select:focus {
   border-color: #58a6ff;
 }
 
+.convert-select option {
+  background-color: #21262d;
+  color: #e6edf3;
+}
+
 .convert-btn {
-  padding: 8px 14px;
+  padding: 9px 14px;
   border-radius: 8px;
   border: none;
   background: linear-gradient(135deg, #3fb950, #238636);
@@ -197,7 +240,6 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s ease;
   white-space: nowrap;
 }
 
@@ -206,78 +248,82 @@
   cursor: not-allowed;
 }
 
-.convert-btn:hover:not(:disabled) {
-  opacity: 0.85;
-}
-
-.editor-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.docs-trigger-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #30363d;
-  background: #21262d;
-  color: #58a6ff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.docs-trigger-btn:hover {
-  background: #58a6ff;
-  color: #fff;
-}
-
-.stdin-section {
-  padding: 8px 12px;
-  border-top: 1px solid var(--border-color, #333);
-}
-.stdin-label {
-  display: block;
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 4px;
-}
-.stdin-textarea {
-  width: 100%;
-  background: #1e1e2e;
-  color: #eee;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  resize: vertical;
-}
-
 .run-btn {
   background: #f59e0b;
   color: #1a1a1a;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
-.run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.run-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.review-btn {
+  padding: 10px 25px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  white-space: nowrap;
+}
+
+.review-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.review-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Common button styles */
+.btn-primary {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #333;
+  color: #ccc;
+}
+
+.btn-secondary:hover {
+  background: #1e1e2a;
+}
+
+/* ================================
+   RUN OUTPUT
+================================ */
 
 .run-output-panel {
   border-top: 1px solid #333;
   background: #16161f;
   padding: 12px;
 }
+
 .run-output-header {
   display: flex;
   justify-content: space-between;
   font-weight: 600;
   margin-bottom: 8px;
 }
+
 .run-output-close {
   background: none;
   border: none;
@@ -285,8 +331,14 @@
   cursor: pointer;
   font-size: 14px;
 }
-.run-output-loading { color: #f59e0b; }
-.run-output-error { color: #ef4444; }
+
+.run-output-loading {
+  color: #f59e0b;
+}
+
+.run-output-error {
+  color: #ef4444;
+}
 
 .run-status-row {
   display: flex;
@@ -294,17 +346,33 @@
   align-items: center;
   margin-bottom: 8px;
 }
+
 .run-status-badge {
   padding: 2px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
 }
-.run-status-badge.success { background: #16a34a33; color: #4ade80; }
-.run-status-badge.warn { background: #dc262633; color: #f87171; }
-.run-meta { font-size: 12px; color: #888; }
 
-.run-block { margin-top: 8px; }
+.run-status-badge.success {
+  background: #16a34a33;
+  color: #4ade80;
+}
+
+.run-status-badge.warn {
+  background: #dc262633;
+  color: #f87171;
+}
+
+.run-meta {
+  font-size: 12px;
+  color: #888;
+}
+
+.run-block {
+  margin-top: 8px;
+}
+
 .run-block pre {
   background: #0d0d14;
   padding: 8px;
@@ -313,162 +381,238 @@
   font-size: 13px;
   white-space: pre-wrap;
 }
-.run-block.stderr pre { color: #f87171; }
-.run-block.compile-error pre { color: #fbbf24; }
-.run-block.no-output { color: #666; font-style: italic; }
 
-.icon-btn {
-  background: #1e1e2a;
-  border: 1px solid #2a2a35;
-  color: #ccc;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
+.run-block.stderr pre {
+  color: #f87171;
 }
-.icon-btn:hover { background: #26263380; }
 
-.stdin-toggle-row { padding: 4px 12px; }
-.stdin-toggle {
-  background: none;
-  border: none;
-  color: #8b8bf5;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 0;
+.run-block.compile-error pre {
+  color: #fbbf24;
 }
-.stdin-toggle:hover { text-decoration: underline; }
 
-.btn-primary {
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  color: #fff;
-  border: none;
-  font-weight: 600;
+.run-block.no-output {
+  color: #666;
+  font-style: italic;
 }
-.btn-secondary {
-  background: transparent;
-  border: 1px solid #333;
-  color: #ccc;
-}
-.btn-secondary:hover { background: #1e1e2a; }
-@media (max-width: 768px) {
-  .editor-header {
-    padding: 10px 12px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .editor-title {
-    font-size: 14px;
+
+/* ================================
+   TABLET — 769px to 1100px
+================================ */
+
+@media (max-width: 1100px) and (min-width: 769px) {
+
+  .editor-container {
+    width: 50%;
+    height: auto;
+    min-height: 100%;
   }
 
-  .mode-selector {
-    padding: 8px 12px;
-    gap: 4px;
-  }
-  .mode-btn {
-    padding: 4px 8px;
-    font-size: 11px;
+  .editor-wrapper {
+    flex: none;
+    height: 420px;
   }
 
   .editor-footer-bottom {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 12px;
   }
+
   .line-count {
     text-align: center;
   }
+
   .footer-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .convert-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     width: 100%;
   }
+
+  .convert-wrapper {
+    grid-column: 1 / -1;
+    display: flex;
+    width: 100%;
+  }
+
   .convert-select {
     flex: 1;
+    width: 100%;
   }
+
+  .convert-btn {
+    min-width: 120px;
+  }
+
   .run-btn,
   .review-btn {
     width: 100%;
   }
+
+  .mode-selector {
+    padding: 10px 16px;
+    gap: 6px;
+  }
+
+  .mode-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
 }
+
+/* ================================
+   MOBILE — 768px and below
+================================ */
+
 @media (max-width: 768px) {
+
   .editor-container {
+    width: 100%;
     height: auto;
+    min-height: 100%;
+    border-right: none;
+  }
+
+  .editor-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  .editor-title {
+    font-size: 15px;
   }
 
   .editor-wrapper {
     flex: none;
+    height: 360px;
+  }
+
+  /* Modes wrap instead of hiding */
+  .mode-selector {
+    padding: 10px 16px;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .mode-label {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .mode-btn {
+    padding: 7px 11px;
+    font-size: 11px;
+  }
+
+  /* Footer becomes a clean vertical layout */
+  .editor-footer-bottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 16px 16px;
+  }
+
+  .line-count {
+    text-align: center;
+  }
+
+  .footer-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .convert-wrapper {
+    width: 100%;
+    display: flex;
+  }
+
+  .convert-select {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .convert-btn {
+    padding: 9px 12px;
+  }
+
+  .run-btn,
+  .review-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .review-btn {
+    font-size: 15px;
+  }
+
+  .stdin-toggle-row {
+    padding: 8px 16px;
+  }
+
+  .stdin-section {
+    padding: 10px 16px;
+  }
+
+}
+
+/* ================================
+   SMALL MOBILE — 480px and below
+================================ */
+
+@media (max-width: 480px) {
+
+  .editor-wrapper {
     height: 320px;
   }
 
   .editor-header {
     padding: 10px 12px;
-    flex-wrap: wrap;
-    gap: 8px;
   }
+
   .editor-title {
     font-size: 14px;
   }
 
   .mode-selector {
-    padding: 8px 12px;
-    gap: 4px;
+    padding: 10px 12px;
+    gap: 5px;
   }
+
   .mode-btn {
-    padding: 4px 8px;
-    font-size: 11px;
+    padding: 6px 9px;
+    font-size: 10px;
   }
 
   .editor-footer-bottom {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    padding: 10px 12px 14px;
   }
-  .line-count {
-    text-align: center;
+
+  .convert-btn {
+    font-size: 12px;
+    padding: 9px 10px;
   }
-  .footer-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .convert-wrapper {
-    width: 100%;
-  }
-  .convert-select {
-    flex: 1;
-  }
-  .run-btn,
-  .review-btn {
-    width: 100%;
-  }
+
 }
-.convert-select option {
-  background-color: #21262d;
-  color: #e6edf3;
+/* Fix Run button color */
+.run-btn.btn-secondary {
+  background: #f59e0b;
+  color: #1a1a1a;
+  border: 1px solid #f59e0b;
+  font-weight: 600;
 }
-@media (max-width: 1100px) and (min-width: 769px) {
-  .editor-footer-bottom {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .line-count {
-    text-align: center;
-  }
-  .footer-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .convert-wrapper {
-    width: 100%;
-  }
-  .convert-select {
-    flex: 1;
-  }
-  .run-btn,
-  .review-btn {
-    width: 100%;
-  }
+
+.run-btn.btn-secondary:hover:not(:disabled) {
+  background: #fbbf24;
+  border-color: #fbbf24;
+}
+
+.run-btn.btn-secondary:disabled {
+  background: #f59e0b;
+  color: #1a1a1a;
+  opacity: 0.6;
+  cursor: not-allowed;
 }

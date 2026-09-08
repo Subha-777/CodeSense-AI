@@ -79,13 +79,23 @@ function Admin() {
 
   return (
     <div className="admin-page">
-      <div className="admin-header">
-        <div className="admin-header-left">
-          <h1>⚙️ Admin Dashboard</h1>
-          <span className="admin-badge">Administrator</span>
-        </div>
-        <Link to="/dashboard" className="back-link">← Back to Editor</Link>
-      </div>
+ <div className="admin-header">
+  <div
+    className="admin-header-left"
+    style={{
+      paddingLeft: "0px",
+      minWidth: 0,
+    }}
+  >
+    <h1>⚙️ Admin Dashboard</h1>
+    <span className="admin-badge">Administrator</span>
+  </div>
+
+  <Link to="/dashboard" className="back-link" title="Back to Editor">
+    <span className="back-arrow">←</span>
+    <span className="back-text">Back to Editor</span>
+  </Link>
+</div>
 
       {loading && <p className="admin-status">Loading dashboard...</p>}
       {error && <p className="admin-status error">{error}</p>}

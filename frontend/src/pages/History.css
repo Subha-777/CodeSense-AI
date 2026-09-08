@@ -212,3 +212,8 @@
 .history-delete-btn:hover {
   background: rgba(240, 80, 110, 0.15);
 }
+@media (max-width: 1024px) {
+  .history-page {
+    padding-left: 64px;
+  }
+}

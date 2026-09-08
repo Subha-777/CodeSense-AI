@@ -51,10 +51,15 @@ function Analytics() {
   return (
     <div className="analytics-page">
       <div className="analytics-header">
-        <h1>📊 Analytics Dashboard</h1>
-        <Link to="/dashboard" className="back-link">← Back to Editor</Link>
-      </div>
+  <div className="analytics-header-title">
+    <h1>📊 Analytics Dashboard</h1>
+  </div>
 
+  <Link to="/dashboard" className="back-link" title="Back to Editor">
+    <span className="back-arrow">←</span>
+    <span className="back-text">Back to Editor</span>
+  </Link>
+</div>
       {loading && <p className="analytics-status">Loading analytics...</p>}
       {error && <p className="analytics-status error">{error}</p>}
 

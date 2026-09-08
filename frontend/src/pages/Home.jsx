@@ -1,5 +1,4 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";import axios from "axios";
 import CodeEditor from "../components/CodeEditor";
 import ReviewPanel from "../components/ReviewPanel";
 import Header from "../components/Header";
@@ -8,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import GitHubFetch from "../components/GitHubFetch";
 import ConvertResult from "../components/ConvertResult";
 import DocsGenerator from "../components/DocsGenerator";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../App.css";
 
 function Home() {
@@ -24,6 +24,23 @@ function Home() {
   const [running, setRunning] = useState(false);
   const [runResult, setRunResult] = useState(null);
   const [runError, setRunError] = useState("");
+
+  const location = useLocation();
+const navigate = useNavigate();
+
+useEffect(() => {
+  if (location.state?.historyItem) {
+    const item = location.state.historyItem;
+    setCode(item.code);
+    setLanguage(item.language);
+    setReview(item.review);
+    navigate(location.pathname, { replace: true, state: {} });
+  } else if (location.state?.fresh) {
+    setCode("");
+    setReview("");
+    navigate(location.pathname, { replace: true, state: {} });
+  }
+}, [location.state]);
 
   const handleReview = async () => {
     if (!code.trim()) {

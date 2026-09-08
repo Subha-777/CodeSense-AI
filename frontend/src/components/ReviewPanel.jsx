@@ -42,12 +42,6 @@ const getScoreColor = (score) => {
   return "#f0506e";
 };
 
-const getScoreEmoji = (score) => {
-  if (score >= 90) return "🟢";
-  if (score >= 70) return "🟡";
-  return "🔴";
-};
-
 const extractSections = (text) => {
   const sections = {};
 
@@ -97,49 +91,132 @@ function CollapsibleSection({ title, icon, children, defaultOpen = false }) {
   );
 }
 
-function ScoreBar({ label, score }) {
+function ScoreGauge({ score }) {
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
   const color = getScoreColor(score);
+
   return (
-    <div className="score-bar-row">
-      <span className="score-bar-label">{label}</span>
-      <div className="score-bar-track">
-        <div className="score-bar-fill" style={{ width: `${score}%`, background: color }}></div>
+    <div className="score-gauge-wrap">
+      <svg
+        className="score-gauge-svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 140 140"
+        role="img"
+        aria-label={`Overall score: ${score} out of 100`}
+      >
+        <circle
+          cx="70"
+          cy="70"
+          r={radius}
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="10"
+          fill="none"
+        />
+        <circle
+          cx="70"
+          cy="70"
+          r={radius}
+          stroke={color}
+          strokeWidth="10"
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform="rotate(-90 70 70)"
+          style={{ transition: "stroke-dashoffset 1s ease" }}
+        />
+      </svg>
+
+      <div className="score-gauge-center">
+        <span className="score-gauge-number" style={{ color }}>{score}</span>
+        <span className="score-gauge-outof">/100</span>
       </div>
-      <span className="score-bar-value" style={{ color }}>{score}</span>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }) {
+  const color = getScoreColor(value);
+  const circumference = 2 * Math.PI * 20;
+  const offset = circumference - (value / 100) * circumference;
+
+  const getStatus = (score) => {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Good";
+    return "Needs Work";
+  };
+
+  return (
+    <div className="mini-stat" style={{ "--score-color": color }}>
+      <div className="mini-stat-top">
+        <div className="mini-stat-icon">
+          {label === "Readability" && "📖"}
+          {label === "Maintainability" && "🛠️"}
+          {label === "Performance" && "⚡"}
+          {label === "Security" && "🛡️"}
+          {label === "Complexity" && "🧩"}
+        </div>
+
+        <svg className="mini-stat-ring" viewBox="0 0 48 48">
+          <circle
+            className="mini-ring-bg"
+            cx="24"
+            cy="24"
+            r="20"
+          />
+          <circle
+            className="mini-ring-progress"
+            cx="24"
+            cy="24"
+            r="20"
+            style={{
+              strokeDasharray: circumference,
+              strokeDashoffset: offset,
+            }}
+          />
+        </svg>
+
+        <span className="mini-stat-score">{value}</span>
+      </div>
+
+      <div className="mini-stat-label">{label}</div>
+
+      <div className="mini-stat-bottom">
+        <span className="mini-stat-status">{getStatus(value)}</span>
+        <span className="mini-stat-percent">/100</span>
+      </div>
     </div>
   );
 }
 
 function ReviewPanel({ review, loading, code, language, runResult, runLoading, runError }) {
   const [activeTab, setActiveTab] = useState("overview");
+  const [copiedOptimized, setCopiedOptimized] = useState(false);
 
   // Jump to the Run Output tab the moment a run starts, so the user sees it immediately
   useEffect(() => {
     if (runLoading) setActiveTab("output");
   }, [runLoading]);
 
-  const copyReview = () => {
-    navigator.clipboard.writeText(review);
-    alert("Review copied to clipboard!");
-  };
-
   const downloadPDF = () => {
     generateReviewPDF({ code, language, review });
   };
-  const [copiedOptimized, setCopiedOptimized] = useState(false);
 
-const copyOptimizedCode = () => {
-  // Strip markdown code fences (```java ... ```) so only runnable code is copied
-  const codeBlockMatch = sections.optimized.match(/```[\w]*\n([\s\S]*?)```/);
-  const cleanCode = codeBlockMatch ? codeBlockMatch[1].trim() : sections.optimized;
-  navigator.clipboard.writeText(cleanCode);
-  setCopiedOptimized(true);
-  setTimeout(() => setCopiedOptimized(false), 2000);
-};
   const overallScore = review ? extractScore(review) : null;
   const scores = review ? extractScores(review) : {};
   const sections = review ? extractSections(review) : {};
   const hasScores = Object.keys(scores).length > 0;
+
+  const copyOptimizedCode = () => {
+    const codeBlockMatch = sections.optimized?.match(/```[\w]*\n([\s\S]*?)```/);
+    const cleanCode = codeBlockMatch ? codeBlockMatch[1].trim() : sections.optimized;
+    navigator.clipboard.writeText(cleanCode);
+    setCopiedOptimized(true);
+    setTimeout(() => setCopiedOptimized(false), 2000);
+  };
 
   const hasDetails = sections.complexity || sections.security || sections.teacher ||
     sections.tests || sections.beginner || sections.advanced ||
@@ -159,8 +236,8 @@ const copyOptimizedCode = () => {
         <h2 className="review-title">🤖 AI Review</h2>
         {review && (
           <div className="review-actions">
-          <button className="copy-btn" onClick={downloadPDF}>📄 PDF</button>
-        </div>
+            <button className="copy-btn" onClick={downloadPDF}>📄 PDF</button>
+          </div>
         )}
       </div>
 
@@ -174,23 +251,16 @@ const copyOptimizedCode = () => {
         )}
 
         {!loading && overallScore !== null && (
-          <div className="score-card">
-            <div className="score-main">
-              <span className="score-emoji">{getScoreEmoji(overallScore)}</span>
-              <span className="score-number" style={{ color: getScoreColor(overallScore) }}>
-                {overallScore}
-              </span>
-              <span className="score-outof">/100</span>
-            </div>
-            <div className="score-label">Overall Quality Score</div>
-
+          <div className="score-hero">
+            <ScoreGauge score={overallScore} />
+            <div className="score-hero-label">Overall Quality Score</div>
             {hasScores && (
-              <div className="score-bars">
-                {scores.readability && <ScoreBar label="Readability" score={scores.readability} />}
-                {scores.maintainability && <ScoreBar label="Maintainability" score={scores.maintainability} />}
-                {scores.performance && <ScoreBar label="Performance" score={scores.performance} />}
-                {scores.security && <ScoreBar label="Security" score={scores.security} />}
-                {scores.complexity && <ScoreBar label="Complexity" score={scores.complexity} />}
+              <div className="score-mini-grid">
+                {scores.readability !== undefined && <MiniStat label="Readability" value={scores.readability} />}
+                {scores.maintainability !== undefined && <MiniStat label="Maintainability" value={scores.maintainability} />}
+                {scores.performance !== undefined && <MiniStat label="Performance" value={scores.performance} />}
+                {scores.security !== undefined && <MiniStat label="Security" value={scores.security} />}
+                {scores.complexity !== undefined && <MiniStat label="Complexity" value={scores.complexity} />}
               </div>
             )}
           </div>
@@ -198,6 +268,7 @@ const copyOptimizedCode = () => {
 
         {!loading && (
           <>
+            <div className="review-tabs-wrapper">
             <div className="review-tabs">
               {tabs.map((tab) => (
                 <button
@@ -209,7 +280,7 @@ const copyOptimizedCode = () => {
                 </button>
               ))}
             </div>
-
+              </div>
             <div className="review-tab-content">
               {activeTab === "overview" && (
                 <>
@@ -249,20 +320,20 @@ const copyOptimizedCode = () => {
               )}
 
               {activeTab === "optimized" && (
-  sections.optimized ? (
-    <div className="review-section">
-      <div className="section-heading-row">
-        <h3 className="section-heading">🚀 Optimized Code</h3>
-        <button className="section-copy-btn" onClick={copyOptimizedCode}>
-          {copiedOptimized ? "✅ Copied!" : "📋 Copy"}
-        </button>
-      </div>
-      <div className="section-content"><ReactMarkdown>{sections.optimized}</ReactMarkdown></div>
-    </div>
-  ) : (
-    <p className="tab-empty-hint">{review ? "No optimized code for this review mode." : "Run a review first."}</p>
-  )
-)}
+                sections.optimized ? (
+                  <div className="review-section">
+                    <div className="section-heading-row">
+                      <h3 className="section-heading">🚀 Optimized Code</h3>
+                      <button className="section-copy-btn" onClick={copyOptimizedCode}>
+                        {copiedOptimized ? "✅ Copied!" : "📋 Copy"}
+                      </button>
+                    </div>
+                    <div className="section-content"><ReactMarkdown>{sections.optimized}</ReactMarkdown></div>
+                  </div>
+                ) : (
+                  <p className="tab-empty-hint">{review ? "No optimized code for this review mode." : "Run a review first."}</p>
+                )
+              )}
 
               {activeTab === "details" && (
                 <div className="collapsible-sections">

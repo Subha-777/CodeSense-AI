@@ -128,9 +128,15 @@ function Profile() {
     <div className="bg-blob bg-blob-2"></div>
 
     <div className="profile-header">
-      <h1>My Profile</h1>
-      <Link to="/dashboard" className="back-link">← Back to Editor</Link>
-    </div>
+  <div className="profile-header-title">
+    <h1>My Profile</h1>
+  </div>
+
+  <Link to="/dashboard" className="back-link" title="Back to Editor">
+    <span className="back-arrow">←</span>
+    <span className="back-text">Back to Editor</span>
+  </Link>
+</div>
 
     {loading ? (
       <p className="profile-status">Loading profile...</p>
