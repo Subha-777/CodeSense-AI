@@ -135,3 +135,22 @@
   padding-right: 44px;
   box-sizing: border-box;
 }
+.link-btn {
+  background: none;
+  border: none;
+  color: #58a6ff;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link-btn:hover {
+  color: #79c0ff;
+}
+
+.link-btn:disabled {
+  color: #6e7681;
+  cursor: not-allowed;
+  text-decoration: none;
+}

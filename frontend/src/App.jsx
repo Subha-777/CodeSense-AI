@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOtp from "./pages/VerifyOtp";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+             <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route
             path="/admin"
             element={

@@ -31,11 +31,13 @@ function Register() {
     setLoading(true);
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-  name,
-  email,
-  password,
-});
-      navigate("/login", { state: { registered: true } });
+        name,
+        email,
+        password,
+      });
+      // Account isn't created yet — server only sent an OTP.
+      // Take the user to the verification screen to finish signup.
+      navigate("/verify-otp", { state: { email } });
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");
     }
@@ -107,7 +109,7 @@ function Register() {
         </div>
 
         <button type="submit" disabled={loading}>
-          {loading ? "Creating account..." : "Register"}
+          {loading ? "Sending OTP..." : "Register"}
         </button>
 
         <p className="auth-switch">
