@@ -3,12 +3,20 @@ const nodemailer = require("nodemailer");
 // Set these in your .env AND in Render's environment variables:
 //   GMAIL_USER=youraddress@gmail.com
 //   GMAIL_APP_PASSWORD=xxxxxxxxxxxxxxxx   (16-char App Password, no spaces)
+//
+// Using explicit host/port/secure (instead of the "gmail" service shorthand)
+// plus family: 4 forces the connection over IPv4. Some hosting environments
+// resolve smtp.gmail.com to an IPv6 address first but can't actually route
+// IPv6 traffic, causing an ENETUNREACH error. Forcing IPv4 avoids that.
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
+  family: 4,
 });
 
 async function sendOtpEmail(toEmail, otp, purpose = "register") {
