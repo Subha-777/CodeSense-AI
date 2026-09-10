@@ -1,23 +1,31 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns").promises;
 
-// Set these in your .env AND in Render's environment variables:
-//   GMAIL_USER=youraddress@gmail.com
-//   GMAIL_APP_PASSWORD=xxxxxxxxxxxxxxxx   (16-char App Password, no spaces)
+// We resolve smtp.gmail.com to a literal IPv4 address ourselves (dns.resolve4
+// only ever returns "A" records, i.e. IPv4 - never IPv6) and connect directly
+// to that IP. This sidesteps Node/Nodemailer's own hostname resolution
+// entirely, which is what kept producing an IPv6 connection attempt on this
+// host despite every other option we tried.
 //
-// Using explicit host/port/secure (instead of the "gmail" service shorthand)
-// plus family: 4 forces the connection over IPv4. Some hosting environments
-// resolve smtp.gmail.com to an IPv6 address first but can't actually route
-// IPv6 traffic, causing an ENETUNREACH error. Forcing IPv4 avoids that.
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  family: 4,
-});
+// tls.servername is set explicitly so the TLS certificate check still
+// validates against "smtp.gmail.com" even though we're connecting by IP.
+async function getTransporter() {
+  const addresses = await dns.resolve4("smtp.gmail.com");
+  const ipv4Address = addresses[0];
+
+  return nodemailer.createTransport({
+    host: ipv4Address,
+    port: 465,
+    secure: true,
+    tls: {
+      servername: "smtp.gmail.com",
+    },
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+}
 
 async function sendOtpEmail(toEmail, otp, purpose = "register") {
   const isReset = purpose === "reset";
@@ -28,6 +36,8 @@ async function sendOtpEmail(toEmail, otp, purpose = "register") {
   const bodyText = isReset
     ? "Use this code to reset your password. It expires in 10 minutes."
     : "Use this code to finish creating your account. It expires in 10 minutes.";
+
+  const transporter = await getTransporter();
 
   await transporter.sendMail({
     from: `"CodeSense AI" <${process.env.GMAIL_USER}>`,
