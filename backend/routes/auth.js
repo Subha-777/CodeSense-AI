@@ -231,6 +231,101 @@ router.post("/google", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
+// POST /api/auth/github  (NEW - GitHub Sign-In)
+// Frontend's callback page sends us the temporary "code" GitHub gave it.
+// We exchange that code for an access token, use the token to fetch the
+// user's GitHub profile + email, then find-or-create a user exactly like
+// the Google flow.
+// ---------------------------------------------------------------------
+router.post("/github", async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      return res.status(400).json({ error: "Missing GitHub code" });
+    }
+
+    // Step 1: exchange the code for an access token
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+      }),
+    });
+    const tokenData = await tokenRes.json();
+
+    if (!tokenData.access_token) {
+      return res.status(401).json({ error: "GitHub sign-in failed: invalid code" });
+    }
+    const accessToken = tokenData.access_token;
+
+    // Step 2: fetch the GitHub profile (User-Agent header is required by GitHub's API)
+    const profileRes = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "CodeSense-AI",
+      },
+    });
+    const profile = await profileRes.json();
+
+    // Step 3: GitHub's profile.email can be null if the user's email is
+    // private, so fall back to the emails endpoint and pick the verified
+    // primary one.
+    let email = profile.email;
+    if (!email) {
+      const emailsRes = await fetch("https://api.github.com/user/emails", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "User-Agent": "CodeSense-AI",
+        },
+      });
+      const emails = await emailsRes.json();
+      const primary = Array.isArray(emails)
+        ? emails.find((e) => e.primary && e.verified)
+        : null;
+      email = primary ? primary.email : null;
+    }
+
+    if (!email) {
+      return res.status(400).json({
+        error: "Your GitHub account has no verified email available. Please add one on GitHub and try again.",
+      });
+    }
+
+    const githubId = String(profile.id);
+    const name = profile.name || profile.login;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        githubId,
+        profilePhoto: profile.avatar_url || null,
+      });
+    } else if (!user.githubId) {
+      user.githubId = githubId;
+      await user.save();
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin },
+    });
+  } catch (error) {
+    res.status(401).json({ error: "GitHub sign-in failed: " + error.message });
+  }
+});
+
+// ---------------------------------------------------------------------
 // GET /api/auth/me  (unchanged)
 // ---------------------------------------------------------------------
 router.get("/me", protect, async (req, res) => {

@@ -179,3 +179,29 @@
   display: flex;
   justify-content: center;
 }
+/* Add this to Auth.css - GitHub sign-in button */
+.github-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 320px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+  background: #21262d;
+  color: #e6edf3;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.github-btn:hover {
+  background: #30363d;
+}
+
+.github-btn-icon {
+  font-size: 16px;
+}

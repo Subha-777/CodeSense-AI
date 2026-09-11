@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOtp from "./pages/VerifyOtp";
+import GithubCallback from "./pages/GithubCallback";
 
 function App() {
   return (
@@ -62,7 +63,7 @@ function App() {
                 <AppLayout><Profile /></AppLayout>
               </ProtectedRoute>
             }
-          />
+          /><Route path="/auth/github/callback" element={<GithubCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>

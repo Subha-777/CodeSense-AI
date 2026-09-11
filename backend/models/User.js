@@ -4,15 +4,16 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  // Not required anymore -- Google sign-in accounts have no password at all.
-  // A normal email/password account must still have one.
+  // Not required for Google or GitHub sign-in accounts - they have no
+  // password at all. A normal email/password account must still have one.
   password: {
     type: String,
     required: function () {
-      return !this.googleId;
+      return !this.googleId && !this.githubId;
     },
   },
   googleId: { type: String, default: null },
+  githubId: { type: String, default: null },
   isAdmin: { type: Boolean, default: false },
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
@@ -26,9 +27,7 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare entered password with hashed one.
-// Google-only accounts have no password, so this safely returns false
-// instead of crashing if someone somehow calls it on one.
+// Safely returns false instead of crashing for password-less OAuth accounts
 userSchema.methods.comparePassword = async function (enteredPassword) {
   if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);

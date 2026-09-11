@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import "./Auth.css";
 import { useLocation } from "react-router-dom";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import GithubAuthButton from "../components/GithubAuthButton";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -98,6 +99,10 @@ function Login() {
 
         <div className="google-btn-wrapper">
           <GoogleAuthButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+        </div>
+
+        <div className="google-btn-wrapper">
+          <GithubAuthButton />
         </div>
 
         <p className="auth-switch">
