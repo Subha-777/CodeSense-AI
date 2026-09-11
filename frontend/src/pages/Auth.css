@@ -154,3 +154,28 @@
   cursor: not-allowed;
   text-decoration: none;
 }
+/* Add this to Auth.css - divider + wrapper for the Google sign-in button */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #6e7681;
+  font-size: 12px;
+  margin: 16px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #30363d;
+}
+
+.auth-divider span {
+  padding: 0 12px;
+}
+
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+}

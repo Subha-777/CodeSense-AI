@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const Otp = require("../models/Otp");
 const PendingRegistration = require("../models/PendingRegistration");
@@ -16,9 +17,10 @@ const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 // ---------------------------------------------------------------------
 // POST /api/auth/register  (step 1: submit details, receive OTP by email)
-// Nothing is saved to the real Users collection yet.
 // ---------------------------------------------------------------------
 router.post("/register", async (req, res) => {
   try {
@@ -36,7 +38,6 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already registered" });
     }
 
-    // Replace any previous unfinished attempt for this email
     await PendingRegistration.deleteOne({ email });
     await Otp.deleteMany({ email, purpose: "register" });
 
@@ -62,7 +63,7 @@ router.post("/register", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// POST /api/auth/verify-registration-otp  (step 2: OTP confirmed -> account created)
+// POST /api/auth/verify-registration-otp
 // ---------------------------------------------------------------------
 router.post("/verify-registration-otp", async (req, res) => {
   try {
@@ -98,7 +99,6 @@ router.post("/verify-registration-otp", async (req, res) => {
       });
     }
 
-    // Plain password here is intentional -- User's pre-save hook hashes it.
     await User.create({
       name: pending.name,
       email: pending.email,
@@ -142,7 +142,7 @@ router.post("/resend-registration-otp", async (req, res) => {
       expiresAt,
     });
 
-    pending.expiresAt = expiresAt; // keep pending record alive alongside new OTP
+    pending.expiresAt = expiresAt;
     await pending.save();
 
     await sendOtpEmail(email, otp, "register");
@@ -177,6 +177,56 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ---------------------------------------------------------------------
+// POST /api/auth/google  (NEW - Google Sign-In)
+// Frontend sends the ID token Google gave it after the user picks an
+// account. We verify that token really came from Google and really is
+// for our app, then find-or-create a user and log them in exactly like
+// any other login (same JWT, same response shape).
+// ---------------------------------------------------------------------
+router.post("/google", async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: "Missing Google credential" });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId, picture } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Brand new user signing in with Google for the first time
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        profilePhoto: picture || null,
+      });
+    } else if (!user.googleId) {
+      // An existing email/password account is using Google sign-in for
+      // the first time - link the two together rather than creating a
+      // duplicate account for the same email.
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin },
+    });
+  } catch (error) {
+    res.status(401).json({ error: "Google sign-in failed: " + error.message });
   }
 });
 
@@ -253,9 +303,7 @@ router.put("/update-photo", protect, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// POST /api/auth/forgot-password  (step 1: request OTP)
-// Response is identical whether or not the email exists, so an attacker
-// can't use this endpoint to find out which emails have accounts.
+// POST /api/auth/forgot-password  (unchanged)
 // ---------------------------------------------------------------------
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -280,7 +328,7 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// POST /api/auth/reset-password  (step 2: verify OTP + set new password)
+// POST /api/auth/reset-password  (unchanged)
 // ---------------------------------------------------------------------
 router.post("/reset-password", async (req, res) => {
   try {

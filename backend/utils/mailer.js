@@ -53,4 +53,4 @@ async function sendOtpEmail(toEmail, otp, purpose = "register") {
   }
 }
 
-module.exports = { sendOtpEmail };
+module.exports = { sendOtpEmail };  

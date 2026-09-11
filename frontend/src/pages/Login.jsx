@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import "./Auth.css";
 import { useLocation } from "react-router-dom";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -16,25 +17,39 @@ function Login() {
   const location = useLocation();
   const justRegistered = location.state?.registered;
 
+  const goToDashboard = (user) => {
+    if (user.isAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-  email,
-  password,
-});
+        email,
+        password,
+      });
       login(res.data.user, res.data.token);
-      if (res.data.user.isAdmin) {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      goToDashboard(res.data.user);
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     }
     setLoading(false);
+  };
+
+  const handleGoogleSuccess = (data) => {
+    setError("");
+    login(data.user, data.token);
+    goToDashboard(data.user);
+  };
+
+  const handleGoogleError = (message) => {
+    setError(message);
   };
 
   return (
@@ -43,8 +58,8 @@ function Login() {
         <h2>Welcome Back</h2>
         <p className="auth-subtitle">Log in to CodeSense AI</p>
         {justRegistered && (
-  <div className="auth-success">Account created! Please log in.</div>
-)}
+          <div className="auth-success">Account created! Please log in.</div>
+        )}
 
         {error && <div className="auth-error">{error}</div>}
 
@@ -76,6 +91,14 @@ function Login() {
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
+
+        <div className="google-btn-wrapper">
+          <GoogleAuthButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+        </div>
 
         <p className="auth-switch">
           <Link to="/forgot-password">Forgot Password?</Link>

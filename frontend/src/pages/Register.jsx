@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 import "./Auth.css";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 
 function Register() {
   const [name, setName] = useState("");
@@ -12,6 +14,7 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -35,13 +38,28 @@ function Register() {
         email,
         password,
       });
-      // Account isn't created yet — server only sent an OTP.
-      // Take the user to the verification screen to finish signup.
       navigate("/verify-otp", { state: { email } });
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");
     }
     setLoading(false);
+  };
+
+  // Google sign-in skips OTP entirely - Google has already verified this
+  // is a real, owned email address, so the backend creates + logs the
+  // user in immediately, in one step.
+  const handleGoogleSuccess = (data) => {
+    setError("");
+    login(data.user, data.token);
+    if (data.user.isAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const handleGoogleError = (message) => {
+    setError(message);
   };
 
   return (
@@ -111,6 +129,14 @@ function Register() {
         <button type="submit" disabled={loading}>
           {loading ? "Sending OTP..." : "Register"}
         </button>
+
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
+
+        <div className="google-btn-wrapper">
+          <GoogleAuthButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+        </div>
 
         <p className="auth-switch">
           Already have an account? <Link to="/login">Login</Link>
