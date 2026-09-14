@@ -1,25 +1,21 @@
-// Sends email via Brevo's HTTP API (port 443, same as any normal web
-// request) instead of raw SMTP sockets. Render's free tier blocks outbound
-// SMTP ports (465/587/25) entirely, which is why every SMTP-based approach
-// failed no matter how the connection was configured. HTTPS isn't blocked -
-// it's the same kind of connection your frontend already makes successfully.
-//
-// Requires two environment variables (set in .env locally AND in Render's
-// dashboard):
-//   BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//   BREVO_SENDER_EMAIL=youraddress@gmail.com   (must be a verified sender in Brevo)
-
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
 async function sendOtpEmail(toEmail, otp, purpose = "register") {
-  const isReset = purpose === "reset";
-  const subject = isReset
-    ? "Reset your CodeSense AI password"
-    : "Verify your CodeSense AI account";
-  const heading = isReset ? "Reset your password" : "Verify your email";
-  const bodyText = isReset
-    ? "Use this code to reset your password. It expires in 10 minutes."
-    : "Use this code to finish creating your account. It expires in 10 minutes.";
+  let subject, heading, bodyText;
+
+  if (purpose === "reset") {
+    subject = "Reset your CodeSense AI password";
+    heading = "Reset your password";
+    bodyText = "Use this code to reset your password. It expires in 10 minutes.";
+  } else if (purpose === "change-password") {
+    subject = "Confirm your CodeSense AI password change";
+    heading = "Confirm password change";
+    bodyText = "Use this code to confirm your password change. It expires in 10 minutes.";
+  } else {
+    subject = "Verify your CodeSense AI account";
+    heading = "Verify your email";
+    bodyText = "Use this code to finish creating your account. It expires in 10 minutes.";
+  }
 
   const response = await fetch(BREVO_API_URL, {
     method: "POST",
@@ -53,4 +49,4 @@ async function sendOtpEmail(toEmail, otp, purpose = "register") {
   }
 }
 
-module.exports = { sendOtpEmail };  
+module.exports = { sendOtpEmail };

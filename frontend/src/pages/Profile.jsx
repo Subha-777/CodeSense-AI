@@ -13,9 +13,11 @@ function Profile() {
   const [photoMessage, setPhotoMessage] = useState("");
   const [photoError, setPhotoError] = useState("");
 
+  const [pwStep, setPwStep] = useState("form"); // "form" | "otp"
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [pwMessage, setPwMessage] = useState("");
   const [pwError, setPwError] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
@@ -24,13 +26,13 @@ function Profile() {
     const fetchData = async () => {
       try {
         const [meRes, analyticsRes] = await Promise.all([
-  axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  }),
-  axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`, {
-    headers: { Authorization: `Bearer ${token}` },
-  }),
-]);
+          axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
         setProfile(meRes.data.user);
         setStats(analyticsRes.data);
       } catch (err) {
@@ -48,23 +50,21 @@ function Profile() {
     setPhotoError("");
     setPhotoMessage("");
 
-    // Check file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       setPhotoError("Image too large. Please use an image under 2MB");
       return;
     }
 
-    // Convert to base64
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target.result;
       setPhotoLoading(true);
       try {
         const res = await axios.put(
-  `${import.meta.env.VITE_API_URL}/api/auth/update-photo`,
-  { profilePhoto: base64 },
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+          `${import.meta.env.VITE_API_URL}/api/auth/update-photo`,
+          { profilePhoto: base64 },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         setProfile((prev) => ({ ...prev, profilePhoto: res.data.profilePhoto }));
         setPhotoMessage("Profile photo updated successfully!");
       } catch (err) {
@@ -75,6 +75,7 @@ function Profile() {
     reader.readAsDataURL(file);
   };
 
+  // Step 1: verify current password, trigger OTP email
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPwError("");
@@ -88,20 +89,48 @@ function Profile() {
     setPwLoading(true);
     try {
       const res = await axios.put(
-  `${import.meta.env.VITE_API_URL}/api/auth/change-password`,
-  { currentPassword, newPassword },
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+        `${import.meta.env.VITE_API_URL}/api/auth/change-password`,
+        { currentPassword, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setPwMessage(res.data.message);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      setPwStep("otp");
     } catch (err) {
       setPwError(err.response?.data?.error || "Failed to update password");
     }
     setPwLoading(false);
   };
 
+  // Step 2: confirm the OTP, password actually changes now
+  const handleVerifyPasswordOtp = async (e) => {
+    e.preventDefault();
+    setPwError("");
+    setPwMessage("");
+    setPwLoading(true);
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/auth/verify-change-password-otp`,
+        { otp, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPwMessage(res.data.message);
+      setPwStep("form");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setOtp("");
+    } catch (err) {
+      setPwError(err.response?.data?.error || "Failed to verify OTP");
+    }
+    setPwLoading(false);
+  };
+
+  const cancelPasswordChange = () => {
+    setPwStep("form");
+    setOtp("");
+    setPwError("");
+    setPwMessage("");
+  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
@@ -113,112 +142,160 @@ function Profile() {
   };
 
   const getRingClass = (score) => {
-  if (score === null || score === undefined) return "ring-neutral";
-  if (score >= 80) return "ring-high";
-  if (score >= 60) return "ring-mid";
-  return "ring-low";
-};
+    if (score === null || score === undefined) return "ring-neutral";
+    if (score >= 80) return "ring-high";
+    if (score >= 60) return "ring-mid";
+    return "ring-low";
+  };
   const initials = profile?.name
     ? profile.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "?";
 
   return (
-  <div className="profile-page">
-    <div className="bg-blob bg-blob-1"></div>
-    <div className="bg-blob bg-blob-2"></div>
+    <div className="profile-page">
+      <div className="bg-blob bg-blob-1"></div>
+      <div className="bg-blob bg-blob-2"></div>
 
-    <div className="profile-header">
-  <div className="profile-header-title">
-    <h1>My Profile</h1>
-  </div>
-
-  <Link to="/dashboard" className="back-link" title="Back to Editor">
-    <span className="back-arrow">←</span>
-    <span className="back-text">Back to Editor</span>
-  </Link>
-</div>
-
-    {loading ? (
-      <p className="profile-status">Loading profile...</p>
-    ) : (
-      <div className="profile-content">
-
-        {/* Cover + Avatar */}
-        <div className="profile-cover">
-          <div className="cover-gradient"></div>
-
-          <div className="profile-avatar-wrapper">
-            <div className={`profile-avatar-ring ${getRingClass(stats?.averageScore)}`}>
-              {profile?.profilePhoto ? (
-                <img src={profile.profilePhoto} alt="Profile" className="profile-avatar-img" />
-              ) : (
-                <div className="profile-avatar">{initials}</div>
-              )}
-            </div>
-            <label className="avatar-overlay" title="Change photo">
-              <span className="avatar-overlay-icon">{photoLoading ? "⏳" : "📷"}</span>
-              <input type="file" accept="image/*" onChange={handleAvatarChange} hidden />
-            </label>
-          </div>
+      <div className="profile-header">
+        <div className="profile-header-title">
+          <h1>My Profile</h1>
         </div>
 
-        <div className="profile-identity">
-          <h2>{profile?.name}</h2>
-          <p className="profile-email">{profile?.email}</p>
-          <span className="profile-joined-badge">🗓️ Member since {formatDate(profile?.createdAt)}</span>
-          {photoMessage && <p className="photo-success">{photoMessage}</p>}
-          {photoError && <p className="photo-error">{photoError}</p>}
-        </div>
-
-        {/* Stat chips */}
-        <div className="stat-chip-row">
-          <div className="stat-chip">
-            <span className="chip-value">{stats?.totalReviews ?? 0}</span>
-            <span className="chip-label">Total Reviews</span>
-          </div>
-          <div className="stat-chip">
-            <span className="chip-value">
-              {stats?.averageScore !== null && stats?.averageScore !== undefined ? `${stats.averageScore}` : "—"}
-              <span className="chip-unit">/100</span>
-            </span>
-            <span className="chip-label">Average Score</span>
-          </div>
-          <div className="stat-chip">
-            <span className="chip-value">{stats ? Object.keys(stats.languageCounts).length : 0}</span>
-            <span className="chip-label">Languages Used</span>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div className="profile-quicklinks">
-          <Link to="/history" className="quicklink-pill">
-            <span className="quicklink-icon">📜</span> Review History
-          </Link>
-          <Link to="/analytics" className="quicklink-pill">
-            <span className="quicklink-icon">📊</span> Analytics Dashboard
-          </Link>
-        </div>
-
-        {/* Change Password */}
-        <div className="glass-panel">
-          <h3>🔒 Change Password</h3>
-          {pwMessage && <div className="pw-success">{pwMessage}</div>}
-          {pwError && <div className="pw-error">{pwError}</div>}
-          <form onSubmit={handlePasswordChange} className="password-form">
-            <label>Current Password</label>
-            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required placeholder="Enter current password" />
-            <label>New Password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={6} required placeholder="Enter new password" />
-            <label>Confirm New Password</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={6} required placeholder="Confirm new password" />
-            <button type="submit" disabled={pwLoading}>{pwLoading ? "Updating..." : "Update Password"}</button>
-          </form>
-        </div>
-
-        <button className="logout-btn-profile" onClick={logout}>Logout</button>
+        <Link to="/dashboard" className="back-link" title="Back to Editor">
+          <span className="back-arrow">←</span>
+          <span className="back-text">Back to Editor</span>
+        </Link>
       </div>
-    )}
-  </div>
-);
+
+      {loading ? (
+        <p className="profile-status">Loading profile...</p>
+      ) : (
+        <div className="profile-content">
+          <div className="profile-cover">
+            <div className="cover-gradient"></div>
+
+            <div className="profile-avatar-wrapper">
+              <div className={`profile-avatar-ring ${getRingClass(stats?.averageScore)}`}>
+                {profile?.profilePhoto ? (
+                  <img src={profile.profilePhoto} alt="Profile" className="profile-avatar-img" />
+                ) : (
+                  <div className="profile-avatar">{initials}</div>
+                )}
+              </div>
+              <label className="avatar-overlay" title="Change photo">
+                <span className="avatar-overlay-icon">{photoLoading ? "⏳" : "📷"}</span>
+                <input type="file" accept="image/*" onChange={handleAvatarChange} hidden />
+              </label>
+            </div>
+          </div>
+
+          <div className="profile-identity">
+            <h2>{profile?.name}</h2>
+            <p className="profile-email">{profile?.email}</p>
+            <span className="profile-joined-badge">🗓️ Member since {formatDate(profile?.createdAt)}</span>
+            {photoMessage && <p className="photo-success">{photoMessage}</p>}
+            {photoError && <p className="photo-error">{photoError}</p>}
+          </div>
+
+          <div className="stat-chip-row">
+            <div className="stat-chip">
+              <span className="chip-value">{stats?.totalReviews ?? 0}</span>
+              <span className="chip-label">Total Reviews</span>
+            </div>
+            <div className="stat-chip">
+              <span className="chip-value">
+                {stats?.averageScore !== null && stats?.averageScore !== undefined ? `${stats.averageScore}` : "—"}
+                <span className="chip-unit">/100</span>
+              </span>
+              <span className="chip-label">Average Score</span>
+            </div>
+            <div className="stat-chip">
+              <span className="chip-value">{stats ? Object.keys(stats.languageCounts).length : 0}</span>
+              <span className="chip-label">Languages Used</span>
+            </div>
+          </div>
+
+          <div className="profile-quicklinks">
+            <Link to="/history" className="quicklink-pill">
+              <span className="quicklink-icon">📜</span> Review History
+            </Link>
+            <Link to="/analytics" className="quicklink-pill">
+              <span className="quicklink-icon">📊</span> Analytics Dashboard
+            </Link>
+          </div>
+
+          {/* Change Password */}
+          <div className="glass-panel">
+            <h3>🔒 Change Password</h3>
+            {pwMessage && <div className="pw-success">{pwMessage}</div>}
+            {pwError && <div className="pw-error">{pwError}</div>}
+
+            {pwStep === "form" && (
+              <form onSubmit={handlePasswordChange} className="password-form">
+                <label>Current Password</label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  placeholder="Enter current password"
+                />
+                <label>New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  minLength={6}
+                  required
+                  placeholder="Enter new password"
+                />
+                <label>Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={6}
+                  required
+                  placeholder="Confirm new password"
+                />
+                <button type="submit" disabled={pwLoading}>
+                  {pwLoading ? "Sending OTP..." : "Update Password"}
+                </button>
+              </form>
+            )}
+
+            {pwStep === "otp" && (
+              <form onSubmit={handleVerifyPasswordOtp} className="password-form">
+                <label>Enter OTP sent to {profile?.email}</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  required
+                  placeholder="123456"
+                />
+                <button type="submit" disabled={pwLoading || otp.length !== 6}>
+                  {pwLoading ? "Confirming..." : "Confirm Password Change"}
+                </button>
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={cancelPasswordChange}
+                  style={{ marginTop: "8px" }}
+                >
+                  Cancel
+                </button>
+              </form>
+            )}
+          </div>
+
+          <button className="logout-btn-profile" onClick={logout}>Logout</button>
+        </div>
+      )}
+    </div>
+  );
 }
+
 export default Profile;

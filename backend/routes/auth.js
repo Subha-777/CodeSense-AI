@@ -341,7 +341,9 @@ router.get("/me", protect, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// PUT /api/auth/change-password  (unchanged)
+// PUT /api/auth/change-password  (step 1: verify current password, send OTP)
+// Password is NOT changed yet at this point - only after the OTP below
+// is verified. This matches the same pattern as Forgot Password.
 // ---------------------------------------------------------------------
 router.put("/change-password", protect, async (req, res) => {
   try {
@@ -360,8 +362,61 @@ router.put("/change-password", protect, async (req, res) => {
       return res.status(401).json({ error: "Current password is incorrect" });
     }
 
+    await Otp.deleteMany({ email: user.email, purpose: "change-password" });
+    const otp = generateOtp();
+    const expiresAt = new Date(Date.now() + OTP_TTL_MS);
+    await Otp.create({
+      email: user.email,
+      purpose: "change-password",
+      hashedOtp: hashOtp(otp),
+      expiresAt,
+    });
+    await sendOtpEmail(user.email, otp, "change-password");
+
+    res.json({
+      message: "OTP sent to your email. Enter it to confirm the password change.",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ---------------------------------------------------------------------
+// PUT /api/auth/verify-change-password-otp  (step 2: confirm OTP, actually change it)
+// ---------------------------------------------------------------------
+router.put("/verify-change-password-otp", protect, async (req, res) => {
+  try {
+    const { otp, newPassword } = req.body;
+
+    if (!otp || !newPassword) {
+      return res.status(400).json({ error: "OTP and new password are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    const otpRecord = await Otp.findOne({
+      email: user.email,
+      purpose: "change-password",
+    }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: "OTP expired or not found. Please try again." });
+    }
+    if (otpRecord.attempts >= MAX_OTP_ATTEMPTS) {
+      return res.status(429).json({ error: "Too many incorrect attempts. Please request a new OTP." });
+    }
+    if (!verifyOtp(otp, otpRecord.hashedOtp)) {
+      otpRecord.attempts += 1;
+      await otpRecord.save();
+      return res.status(400).json({ error: "Incorrect OTP" });
+    }
+
     user.password = newPassword;
     await user.save();
+    await Otp.deleteMany({ email: user.email, purpose: "change-password" });
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
