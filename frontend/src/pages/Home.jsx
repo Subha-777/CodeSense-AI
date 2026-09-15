@@ -90,9 +90,9 @@ useEffect(() => {
       alert("Please enter some code first!");
       return;
     }
-    setRunId(Date.now()); // fresh id = fresh terminal + fresh session
+    console.log("TOKEN:", token); // temporary — remove after debugging
+    setRunId(Date.now());
   };
-
   return (
     <div className={`app ${darkMode ? "dark" : "light"}`}>
       <Header
