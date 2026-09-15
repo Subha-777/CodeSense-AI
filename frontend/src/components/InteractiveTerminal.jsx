@@ -37,6 +37,11 @@ export default function InteractiveTerminal({ language, code, token }) {
       // XHR polling (looks like "xhr poll error"). Harmless once this
       // service is on a real domain instead of ngrok.
       extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      // Browsers can't attach custom headers to a WebSocket handshake,
+      // so the upgrade attempt would still hit ngrok's warning page and
+      // fail. Forcing polling avoids that entirely. Safe to remove this
+      // line once the service is behind a real domain (no more ngrok).
+      transports: ['polling'],
     });
 
     socket.on('connect_error', (err) => {
