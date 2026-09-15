@@ -30,7 +30,14 @@ export default function InteractiveTerminal({ language, code, token }) {
     term.open(containerRef.current);
     fitAddon.fit();
 
-    const socket = io(EXECUTION_SERVICE_URL, { auth: { token } });
+    const socket = io(EXECUTION_SERVICE_URL, {
+      auth: { token },
+      // Free ngrok URLs show an HTML "visit site" warning page to any
+      // client that doesn't send this header, which breaks socket.io's
+      // XHR polling (looks like "xhr poll error"). Harmless once this
+      // service is on a real domain instead of ngrok.
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+    });
 
     socket.on('connect_error', (err) => {
       term.writeln(`\r\n[connection error: ${err.message}]`);
