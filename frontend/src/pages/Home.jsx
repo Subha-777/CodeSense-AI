@@ -21,9 +21,7 @@ function Home() {
   const [showDocs, setShowDocs] = useState(false);
   const [convertResult, setConvertResult] = useState(null);
 
-  const [running, setRunning] = useState(false);
-  const [runResult, setRunResult] = useState(null);
-  const [runError, setRunError] = useState("");
+  const [runId, setRunId] = useState(null);
 
   const location = useLocation();
 const navigate = useNavigate();
@@ -87,25 +85,12 @@ useEffect(() => {
     }
   };
 
-  const handleRun = async (stdin) => {
+    const handleRun = () => {
     if (!code.trim()) {
       alert("Please enter some code first!");
       return;
     }
-    setRunning(true);
-    setRunError("");
-    setRunResult(null);
-    try {
-      const res = await axios.post(
-  `${import.meta.env.VITE_API_URL}/api/run-code`,
-  { code, language, stdin },
-  { headers: { Authorization: `Bearer ${token}` } }
-);
-      setRunResult(res.data);
-    } catch (err) {
-      setRunError(err.response?.data?.error || "Failed to run code");
-    }
-    setRunning(false);
+    setRunId(Date.now()); // fresh id = fresh terminal + fresh session
   };
 
   return (
@@ -135,7 +120,7 @@ useEffect(() => {
             onConvert={handleConvert}
             onGenerateDocs={() => setShowDocs(true)}
             onRun={handleRun}
-            running={running}
+            running={!!runId}
           />
         </div>
         <div className="review-side">
@@ -144,9 +129,8 @@ useEffect(() => {
             loading={loading}
             code={code}
             language={language}
-            runResult={runResult}
-            runLoading={running}
-            runError={runError}
+            runId={runId}
+            token={token}
           />
         </div>
         {convertResult && (

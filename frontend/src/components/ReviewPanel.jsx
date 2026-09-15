@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { generateReviewPDF } from "../utils/pdfGenerator";
+import InteractiveTerminal from "./InteractiveTerminal";  
 import "./ReviewPanel.css";
 
 // Extract overall score from review text
@@ -192,14 +193,14 @@ function MiniStat({ label, value }) {
   );
 }
 
-function ReviewPanel({ review, loading, code, language, runResult, runLoading, runError }) {
+function ReviewPanel({ review, loading, code, language, runId, token }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [copiedOptimized, setCopiedOptimized] = useState(false);
 
   // Jump to the Run Output tab the moment a run starts, so the user sees it immediately
-  useEffect(() => {
-    if (runLoading) setActiveTab("output");
-  }, [runLoading]);
+    useEffect(() => {
+    if (runId) setActiveTab("output");
+  }, [runId]);
 
   const downloadPDF = () => {
     generateReviewPDF({ code, language, review });
@@ -395,39 +396,15 @@ function ReviewPanel({ review, loading, code, language, runResult, runLoading, r
 
               {activeTab === "output" && (
                 <div className="run-output-body">
-                  {runLoading && <div className="run-output-loading">⏳ Executing your code...</div>}
-
-                  {runError && !runLoading && (
-                    <div className="run-output-error">❌ {runError}</div>
-                  )}
-
-                  {!runLoading && !runError && !runResult && (
-                    <p className="tab-empty-hint">Click "Run" to execute your code and see output here.</p>
-                  )}
-
-                  {runResult && !runLoading && (
-                    <>
-                      <div className="run-status-row">
-                        <span className={`run-status-badge ${runResult.status === "Accepted" ? "success" : "warn"}`}>
-                          {runResult.status}
-                        </span>
-                        {runResult.time && <span className="run-meta">⏱️ {runResult.time}s</span>}
-                        {runResult.memory && <span className="run-meta">💾 {Math.round(runResult.memory)} MB</span>}
-                      </div>
-
-                      {runResult.compileOutput && (
-                        <div className="run-block compile-error"><strong>Compile Output:</strong><pre>{runResult.compileOutput}</pre></div>
-                      )}
-                      {runResult.stdout && (
-                        <div className="run-block stdout"><strong>stdout:</strong><pre>{runResult.stdout}</pre></div>
-                      )}
-                      {runResult.stderr && (
-                        <div className="run-block stderr"><strong>stderr:</strong><pre>{runResult.stderr}</pre></div>
-                      )}
-                      {!runResult.stdout && !runResult.stderr && !runResult.compileOutput && (
-                        <div className="run-block no-output">No output produced.</div>
-                      )}
-                    </>
+                  {runId ? (
+                    <InteractiveTerminal
+                      key={runId}
+                      language={language}
+                      code={code}
+                      token={token}
+                    />
+                  ) : (
+                    <p className="tab-empty-hint">Click "Run" to execute your code in a live terminal.</p>
                   )}
                 </div>
               )}

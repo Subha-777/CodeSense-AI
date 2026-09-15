@@ -26,8 +26,6 @@ function CodeEditor({ code, setCode, language, loading, handleReview, reviewMode
   const viewRef = useRef(null);
   const [convertTo, setConvertTo] = useState("");
   const [convertLoading, setConvertLoading] = useState(false);
-  const [stdin, setStdin] = useState("");
-  const [showStdin, setShowStdin] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -101,26 +99,6 @@ function CodeEditor({ code, setCode, language, loading, handleReview, reviewMode
       </div>
 
       <div className="editor-wrapper" ref={editorRef}></div>
-
-      <div className="stdin-toggle-row">
-        <button className="stdin-toggle" onClick={() => setShowStdin(!showStdin)}>
-          {showStdin ? "− Hide Input" : "+ Add Program Input"}
-        </button>
-      </div>
-
-      {showStdin && (
-        <div className="stdin-section">
-          <textarea
-            className="stdin-textarea"
-            placeholder="Enter input for your program, one value per line..."
-            value={stdin}
-            onChange={(e) => setStdin(e.target.value)}
-            rows={2}
-            autoFocus
-          />
-        </div>
-      )}
-
       <div className="editor-footer">
         <div className="mode-selector">
           <span className="mode-label">Mode:</span>
@@ -163,7 +141,7 @@ function CodeEditor({ code, setCode, language, loading, handleReview, reviewMode
                 {convertLoading ? "⏳" : "🔄 Convert"}
               </button>
             </div>
-            <button className="run-btn btn-secondary" onClick={() => onRun(stdin)} disabled={running}>
+              <button className="run-btn btn-secondary" onClick={onRun} disabled={running}>
               {running ? "⏳ Running..." : "▶️ Run"}
             </button>
             <button className={`review-btn btn-primary ${loading ? "loading" : ""}`} onClick={handleReview} disabled={loading}>
