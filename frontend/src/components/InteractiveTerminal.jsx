@@ -29,12 +29,21 @@ export default function InteractiveTerminal({ language, code, token, onExit, onE
     term.loadAddon(fitAddon);
     term.open(containerRef.current);
     fitAddon.fit();
-const socket = io(EXECUTION_SERVICE_URL, {
-  auth: { token },
-  extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
-  transports: ['polling'],
-  reconnection: false, // add this — a dropped run shouldn't silently reconnect and start a second session
-});
+
+    const socket = io(EXECUTION_SERVICE_URL, {
+      auth: { token },
+      // Free ngrok URLs show an HTML "visit site" warning page to any
+      // client that doesn't send this header, which breaks socket.io's
+      // XHR polling (looks like "xhr poll error"). Harmless once this
+      // service is on a real domain instead of ngrok.
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      // Browsers can't attach custom headers to a WebSocket handshake,
+      // so the upgrade attempt would still hit ngrok's warning page and
+      // fail. Forcing polling avoids that entirely. Safe to remove this
+      // line once the service is behind a real domain (no more ngrok).
+      transports: ['polling'],
+      reconnection: false, // a dropped run shouldn't silently reconnect and start a second session
+    });
 
     socket.on('connect_error', (err) => {
       term.writeln(`\r\n[connection error: ${err.message}]`);
@@ -42,11 +51,6 @@ const socket = io(EXECUTION_SERVICE_URL, {
     socket.on('status', ({ state }) => {
       if (state === 'starting') term.writeln('[starting session...]\r\n');
     });
-    socket.on('output', ({ data }) => term.write(data));
-    socket.on('error', ({ message }) => term.writeln(`\r\n[${message}]`));
-    socket.on('exit', ({ code: exitCode }) =>
-      term.writeln(`\r\n[process exited with code ${exitCode}]`)
-    );
     socket.on('output', ({ data }) => term.write(data));
     socket.on('error', ({ message }) => {
       term.writeln(`\r\n[${message}]`);
@@ -56,6 +60,7 @@ const socket = io(EXECUTION_SERVICE_URL, {
       term.writeln(`\r\n[process exited with code ${exitCode}]`);
       if (onExit) onExit(exitCode);
     });
+
     socket.emit('run', { language, code });
 
     // Basic line-buffered local echo: the container's programs read stdin
@@ -77,7 +82,7 @@ const socket = io(EXECUTION_SERVICE_URL, {
         term.write(data);
       }
     });
-    
+
     const handleResize = () => fitAddon.fit();
     window.addEventListener('resize', handleResize);
 
@@ -90,7 +95,6 @@ const socket = io(EXECUTION_SERVICE_URL, {
     // to start a fresh run rather than this effect re-running.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
 
   return <div className="interactive-terminal" ref={containerRef} />;
 }
