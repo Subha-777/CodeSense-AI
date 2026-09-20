@@ -100,6 +100,13 @@ const handleRun = () => {
     alert("Please enter some code first!");
     return;
   }
+  if (language === "html") {
+    // Instant preview — no container/socket session needed, so there's
+    // no onExit/onError to reset `running` later. Reset it immediately.
+    setRunId(Date.now()); // still needed to flip ReviewPanel's active tab to "output"
+    setRunning(false);
+    return;
+  }
   setRunning(true);
   setRunId(Date.now());
 };

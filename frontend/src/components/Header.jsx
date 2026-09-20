@@ -2,15 +2,14 @@ import "./Header.css";
 
 const languages = [
   { value: "javascript", label: "JavaScript" },
-  { value: "typescript", label: "TypeScript" },
   { value: "python", label: "Python" },
   { value: "java", label: "Java" },
   { value: "c", label: "C" },
   { value: "cpp", label: "C++" },
   { value: "go", label: "Go" },
   { value: "php", label: "PHP" },
-  { value: "csharp", label: "C#" },
   { value: "rust", label: "Rust" },
+  { value: "html", label: "HTML" },
 ];
 
 function Header({ darkMode, setDarkMode, language, setLanguage }) {

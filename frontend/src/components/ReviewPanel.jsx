@@ -397,7 +397,14 @@ function ReviewPanel({ review, loading, code, language, runId, token, onRunFinis
 
               {activeTab === "output" && (
   <div className="run-output-body">
-    {runId ? (
+    {language === "html" ? (
+      <iframe
+        title="HTML Preview"
+        srcDoc={code}
+        sandbox="allow-scripts"
+        style={{ width: "100%", height: "100%", minHeight: "400px", border: "none", background: "#fff", borderRadius: "8px" }}
+      />
+    ) : runId ? (
       <InteractiveTerminal
         key={runId}
         language={language}

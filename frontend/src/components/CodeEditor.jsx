@@ -5,6 +5,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
+import { html } from "@codemirror/lang-html";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { go } from "@codemirror/lang-go";
 import "./CodeEditor.css";
@@ -16,7 +17,7 @@ const getLanguageExtension = (lang) => {
     case "c":
     case "cpp": return cpp();
     case "go": return go();
-    case "typescript": return javascript({ typescript: true });
+    case "html": return html();
     default: return javascript();
   }
 };
@@ -88,7 +89,7 @@ function CodeEditor({ code, setCode, language, loading, handleReview, reviewMode
         <div className="editor-header-actions">
           <label className="icon-btn" title="Upload File">
             📁
-            <input type="file" accept=".js,.py,.java,.c,.cpp,.php,.txt" onChange={handleFileUpload} hidden />
+            <input type="file" accept=".js,.py,.java,.c,.cpp,.php,.go,.rs,.html,.txt" onChange={handleFileUpload} hidden />
           </label>
           {onGenerateDocs && (
             <button className="icon-btn" onClick={onGenerateDocs} title="Generate Documentation">
@@ -127,14 +128,12 @@ function CodeEditor({ code, setCode, language, loading, handleReview, reviewMode
               <select className="convert-select btn-secondary" value={convertTo} onChange={(e) => setConvertTo(e.target.value)}>
                 <option value="">Convert to...</option>
                 <option value="javascript">JavaScript</option>
-                <option value="typescript">TypeScript</option>
                 <option value="python">Python</option>
                 <option value="java">Java</option>
                 <option value="c">C</option>
                 <option value="cpp">C++</option>
                 <option value="go">Go</option>
                 <option value="php">PHP</option>
-                <option value="csharp">C#</option>
                 <option value="rust">Rust</option>
               </select>
               <button className="convert-btn btn-secondary" onClick={handleConvert} disabled={convertLoading || !convertTo}>
