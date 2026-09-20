@@ -8,6 +8,7 @@ import GitHubFetch from "../components/GitHubFetch";
 import ConvertResult from "../components/ConvertResult";
 import DocsGenerator from "../components/DocsGenerator";
 import { useLocation, useNavigate } from "react-router-dom";
+import { detectLanguage } from "../utils/detectLanguage";
 import "../App.css";
 
 function Home() {
@@ -39,6 +40,13 @@ useEffect(() => {
     navigate(location.pathname, { replace: true, state: {} });
   }
 }, [location.state]);
+useEffect(() => {
+  const detected = detectLanguage(code);
+  if (detected && detected !== language) {
+    setLanguage(detected);
+  }
+}, [code]);
+
 
   const handleReview = async () => {
     if (!code.trim()) {
@@ -85,14 +93,17 @@ useEffect(() => {
     }
   };
 
-    const handleRun = () => {
-    if (!code.trim()) {
-      alert("Please enter some code first!");
-      return;
-    }
-    console.log("TOKEN:", token); // temporary — remove after debugging
-    setRunId(Date.now());
-  };
+const [running, setRunning] = useState(false);
+
+const handleRun = () => {
+  if (!code.trim()) {
+    alert("Please enter some code first!");
+    return;
+  }
+  setRunning(true);
+  setRunId(Date.now());
+};
+    
   return (
     <div className={`app ${darkMode ? "dark" : "light"}`}>
       <Header
@@ -120,18 +131,19 @@ useEffect(() => {
             onConvert={handleConvert}
             onGenerateDocs={() => setShowDocs(true)}
             onRun={handleRun}
-            running={!!runId}
+            running={running}
           />
         </div>
         <div className="review-side">
           <ReviewPanel
-            review={review}
-            loading={loading}
-            code={code}
-            language={language}
-            runId={runId}
-            token={token}
-          />
+  review={review}
+  loading={loading}
+  code={code}
+  language={language}
+  runId={runId}
+  token={token}
+  onRunFinished={() => setRunning(false)}
+/>
         </div>
         {convertResult && (
           <ConvertResult

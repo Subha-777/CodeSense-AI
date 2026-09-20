@@ -15,7 +15,7 @@ const EXECUTION_SERVICE_URL = import.meta.env.VITE_EXECUTION_SERVICE_URL;
  * Mount this fresh (e.g. `key={runId}`) each time the user clicks Run, so
  * a new run always gets a clean terminal + a clean socket connection.
  */
-export default function InteractiveTerminal({ language, code, token }) {
+export default function InteractiveTerminal({ language, code, token, onExit, onError }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -55,7 +55,15 @@ export default function InteractiveTerminal({ language, code, token }) {
     socket.on('exit', ({ code: exitCode }) =>
       term.writeln(`\r\n[process exited with code ${exitCode}]`)
     );
-
+    socket.on('output', ({ data }) => term.write(data));
+    socket.on('error', ({ message }) => {
+      term.writeln(`\r\n[${message}]`);
+      if (onError) onError(message);
+    });
+    socket.on('exit', ({ code: exitCode }) => {
+      term.writeln(`\r\n[process exited with code ${exitCode}]`);
+      if (onExit) onExit(exitCode);
+    });
     socket.emit('run', { language, code });
 
     // Basic line-buffered local echo: the container's programs read stdin
@@ -90,6 +98,7 @@ export default function InteractiveTerminal({ language, code, token }) {
     // to start a fresh run rather than this effect re-running.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
 
   return <div className="interactive-terminal" ref={containerRef} />;
 }

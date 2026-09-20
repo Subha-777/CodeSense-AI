@@ -193,7 +193,7 @@ function MiniStat({ label, value }) {
   );
 }
 
-function ReviewPanel({ review, loading, code, language, runId, token }) {
+function ReviewPanel({ review, loading, code, language, runId, token, onRunFinished }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [copiedOptimized, setCopiedOptimized] = useState(false);
 
@@ -266,6 +266,22 @@ function ReviewPanel({ review, loading, code, language, runId, token }) {
             )}
           </div>
         )}
+        {activeTab === "output" && (
+    <div className="run-output-body">
+      {runId ? (
+        <InteractiveTerminal
+          key={runId}
+          language={language}
+          code={code}
+          token={token}
+          onExit={onRunFinished}
+          onError={onRunFinished}
+        />
+      ) : (
+        <p className="tab-empty-hint">Click "Run" to execute your code in a live terminal.</p>
+      )}
+    </div>
+  )}
 
         {!loading && (
           <>
