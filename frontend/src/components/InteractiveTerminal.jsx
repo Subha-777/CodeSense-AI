@@ -29,20 +29,12 @@ export default function InteractiveTerminal({ language, code, token, onExit, onE
     term.loadAddon(fitAddon);
     term.open(containerRef.current);
     fitAddon.fit();
-
-    const socket = io(EXECUTION_SERVICE_URL, {
-      auth: { token },
-      // Free ngrok URLs show an HTML "visit site" warning page to any
-      // client that doesn't send this header, which breaks socket.io's
-      // XHR polling (looks like "xhr poll error"). Harmless once this
-      // service is on a real domain instead of ngrok.
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
-      // Browsers can't attach custom headers to a WebSocket handshake,
-      // so the upgrade attempt would still hit ngrok's warning page and
-      // fail. Forcing polling avoids that entirely. Safe to remove this
-      // line once the service is behind a real domain (no more ngrok).
-      transports: ['polling'],
-    });
+const socket = io(EXECUTION_SERVICE_URL, {
+  auth: { token },
+  extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+  transports: ['polling'],
+  reconnection: false, // add this — a dropped run shouldn't silently reconnect and start a second session
+});
 
     socket.on('connect_error', (err) => {
       term.writeln(`\r\n[connection error: ${err.message}]`);
@@ -85,7 +77,7 @@ export default function InteractiveTerminal({ language, code, token, onExit, onE
         term.write(data);
       }
     });
-
+    
     const handleResize = () => fitAddon.fit();
     window.addEventListener('resize', handleResize);
 
