@@ -467,7 +467,18 @@
 
 .run-output-loading { color: #f59e0b; padding: 12px 0; }
 .run-output-error { color: #ef4444; padding: 12px 0; }
+.run-output-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
 
+.run-output-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
 .run-status-row {
   display: flex;
   gap: 12px;

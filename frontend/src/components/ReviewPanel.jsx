@@ -308,7 +308,12 @@ function ReviewPanel({ review, loading, code, language, runId, token, onRunFinis
                     </div>
                   )}
                 </>
-              )}
+              )}<iframe
+  srcDoc={code}
+  sandbox="allow-scripts"
+  style={{ width: '100%', height: '100%', border: 'none' }}
+  title="HTML Preview"
+/>
 
               {activeTab === "issues" && (
                 sections.issues ? (
