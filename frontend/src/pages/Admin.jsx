@@ -383,7 +383,7 @@ function Admin() {
                     </div>
                     <div className="system-info-row">
                       <span>Model</span>
-                      <span>gemini-2.5-flash</span>
+                      <span>gemini-3.8-flash</span>
                     </div>
                     <div className="system-info-row">
                       <span>Status</span>
