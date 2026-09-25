@@ -182,7 +182,7 @@ app.post("/review", protect, upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No code provided" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
   const getPrompt = (code, language, mode) => {
       const base = `You are an expert ${language} code reviewer with 20+ years of experience.
@@ -542,7 +542,7 @@ app.post("/api/chat", protect, async (req, res) => {
   try {
     const { messages, code, language, review } = req.body;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     // Build context-aware prompt
     const systemContext = `You are an expert code reviewer and programming teacher with 20+ years of experience. 
@@ -664,7 +664,7 @@ app.post("/api/convert", protect, async (req, res) => {
       return res.status(400).json({ error: "Code, source language, and target language are required" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `You are an expert programmer. Convert the following ${fromLanguage} code to ${toLanguage}.
 
@@ -707,7 +707,7 @@ app.post("/api/generate-docs", protect, async (req, res) => {
       return res.status(400).json({ error: "Code is required" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `You are an expert technical writer and ${language} developer. Generate comprehensive, professional documentation for the following ${language} code.
 
