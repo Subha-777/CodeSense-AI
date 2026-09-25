@@ -326,7 +326,7 @@ router.post("/github", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// GET /api/auth/me  (unchanged)
+// GET /api/auth/me
 // ---------------------------------------------------------------------
 router.get("/me", protect, async (req, res) => {
   res.json({
@@ -336,6 +336,7 @@ router.get("/me", protect, async (req, res) => {
       email: req.user.email,
       createdAt: req.user.createdAt,
       profilePhoto: req.user.profilePhoto,
+      isAdmin: req.user.isAdmin,
     },
   });
 });
