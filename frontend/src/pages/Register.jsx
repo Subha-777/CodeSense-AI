@@ -6,6 +6,21 @@ import "./Auth.css";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import GithubAuthButton from "../components/GithubAuthButton";
 
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M3 3l18 18" />
+    <path d="M10.6 5.2A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a17.7 17.7 0 0 1-3.4 4.3M6.6 6.6C3.4 8.5 1.5 12 1.5 12s3.5 7 10.5 7c1.4 0 2.7-.3 3.9-.7" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  </svg>
+);
+
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -103,8 +118,9 @@ function Register() {
             type="button"
             className="eye-btn"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? "🙈" : "👁️"}
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
           </button>
         </div>
 
@@ -122,8 +138,9 @@ function Register() {
             type="button"
             className="eye-btn"
             onClick={() => setShowConfirm(!showConfirm)}
+            aria-label={showConfirm ? "Hide password" : "Show password"}
           >
-            {showConfirm ? "🙈" : "👁️"}
+            {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
           </button>
         </div>
 
