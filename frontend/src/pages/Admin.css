@@ -541,3 +541,8 @@
     font-size: 12px;
   }
 }
+
+/* Reviews-per-day details table */
+.day-total-row td {
+  background: rgba(155, 123, 255, 0.08);
+}

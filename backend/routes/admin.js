@@ -5,6 +5,26 @@ const Review = require("../models/Review");
 const protect = require("../middleware/authMiddleware");
 const adminOnly = require("../middleware/adminMiddleware");
 
+// Work out a program name from the code (the DB does not store one)
+function getProgramName(code) {
+  const patterns = [
+    /class\s+(\w+)/,                                                    // Java, C#, Python, JS
+    /def\s+(\w+)/,                                                      // Python
+    /function\s+(\w+)/,                                                 // JavaScript, PHP
+    /(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?(?:function|\()/,     // JS arrow / function
+    /\bfn\s+(\w+)/,                                                    // Rust
+    /\bfunc\s+(\w+)/,                                                  // Go
+    /\b(?:int|void|float|double|char|long|bool|string|auto)\s+(\w+)\s*\(/, // C / C++
+  ];
+  for (const p of patterns) {
+    const m = code.match(p);
+    if (m) return m[1];
+  }
+  // Fallback: first non-empty line, shortened
+  const firstLine = code.split("\n").find((l) => l.trim()) || "Untitled";
+  return firstLine.trim().slice(0, 30);
+}
+
 // All admin routes require login + admin role
 router.use(protect, adminOnly);
 
@@ -32,16 +52,50 @@ router.get("/stats", async (req, res) => {
     // Reviews per day (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // Start of the day 6 days ago in India time (IST), so we get 7 full calendar days
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const startOfTodayIST = new Date(Date.now() + IST_OFFSET_MS);
+    startOfTodayIST.setUTCHours(0, 0, 0, 0);
+    const activityStart = new Date(
+      startOfTodayIST.getTime() - IST_OFFSET_MS - 6 * 24 * 60 * 60 * 1000
+    );
+
     const recentActivity = await Review.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      { $match: { createdAt: { $gte: activityStart } } },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Kolkata" },
+          },
           count: { $sum: 1 },
         },
       },
       { $sort: { _id: 1 } },
     ]);
+
+    // Per-day review details (program language, name, size, score, time)
+    const recentReviews = await Review.find({ createdAt: { $gte: activityStart } })
+      .select("code language qualityScore createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const dayMap = {};
+    recentReviews.forEach((r) => {
+      const date = new Date(r.createdAt).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+      if (!dayMap[date]) dayMap[date] = [];
+      dayMap[date].push({
+        time: r.createdAt,
+        language: r.language,
+        programName: getProgramName(r.code),
+        lines: r.code.split("\n").length,
+        score: r.qualityScore,
+      });
+    });
+
+    const dailyReviews = Object.keys(dayMap)
+      .sort()
+      .reverse()
+      .map((date) => ({ date, total: dayMap[date].length, reviews: dayMap[date] }));
 
     // Reviews in last 24 hours
     const oneDayAgo = new Date();
@@ -84,6 +138,7 @@ router.get("/stats", async (req, res) => {
       averageScore,
       languageStats,
       recentActivity,
+      dailyReviews,
       reviewsLast24h,
       newUsersThisWeek,
       mostActiveUsers,

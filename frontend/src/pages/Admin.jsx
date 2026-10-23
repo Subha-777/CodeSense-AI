@@ -199,6 +199,55 @@ function Admin() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+
+              <div className="admin-chart-card full-width">
+                <h3>📅 Reviews Per Day (Details)</h3>
+                <div className="users-table-wrapper">
+                  <table className="users-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Language</th>
+                        <th>Program</th>
+                        <th>Lines</th>
+                        <th>Score</th>
+                      </tr>
+                    </thead>
+
+                    {stats.dailyReviews?.length ? (
+                      stats.dailyReviews.map((day) => (
+                        <tbody key={day.date}>
+                          <tr className="day-total-row">
+                            <td><strong>{day.date}</strong></td>
+                            <td colSpan={5}><strong>Total reviews: {day.total}</strong></td>
+                          </tr>
+                          {day.reviews.map((r, i) => (
+                            <tr key={i}>
+                              <td></td>
+                              <td>
+                                {new Date(r.time).toLocaleTimeString("en-IN", {
+                                  timeZone: "Asia/Kolkata",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </td>
+                              <td>{r.language}</td>
+                              <td>{r.programName}</td>
+                              <td>{r.lines}</td>
+                              <td>{r.score ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      ))
+                    ) : (
+                      <tbody>
+                        <tr><td colSpan={6}>No reviews in the last 7 days.</td></tr>
+                      </tbody>
+                    )}
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
